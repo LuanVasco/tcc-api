@@ -4,16 +4,18 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { PatchUserDTO } from './dto/patch-user.dto';
 
 @Controller('users')
 export class UsersController {
   @Post()
-  create(@Body() body) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { body };
+  create(@Body() { email, name, password }: CreateUserDTO) {
+    return { email, name, password };
   }
 
   @Get()
@@ -22,20 +24,21 @@ export class UsersController {
   }
 
   @Get(':id')
-  findUser(@Param() params) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { user: {}, params };
+  findUser(@Param('id', ParseIntPipe) id: number) {
+    return { user: {}, id };
   }
 
   @Put(':id')
-  updateUser(@Body() body, @Param() params) {
+  updateUser(
+    @Body() { email, name }: PatchUserDTO,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { body, params };
+    return { email, name, id };
   }
 
   @Delete(':id')
-  deleteUser(@Param() params) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { params };
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return { id };
   }
 }
