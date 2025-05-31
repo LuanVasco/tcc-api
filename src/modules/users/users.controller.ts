@@ -1,44 +1,58 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
-  ParseIntPipe,
   Post,
-  Put,
+  Body,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { PatchUserDTO } from './dto/patch-user.dto';
+import { UsersService } from './users.service';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
 
+@ApiTags('Usuários')
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
   @Post()
-  create(@Body() { email, name, password }: CreateUserDTO) {
-    return { email, name, password };
+  async createUser(@Body() body: CreateUserDto) {
+    const existingUser = await this.usersService.findByEmail(body.email);
+    if (existingUser) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+
+    // converter birthday para Date se informado
+    if (body.birthday) {
+      body.birthday = new Date(body.birthday).toISOString();
+    }
+
+    const user = await this.usersService.createUser({
+      ...body,
+      birthday: body.birthday ? new Date(body.birthday) : undefined,
+    });
+    return { id: user.id, email: user.email, name: user.name };
   }
 
   @Get()
-  list() {
-    return { users: [] };
+  async findAll() {
+    return this.usersService.getAll();
   }
 
   @Get(':id')
-  findUser(@Param('id', ParseIntPipe) id: number) {
-    return { user: {}, id };
-  }
-
-  @Put(':id')
-  updateUser(
-    @Body() { email, name }: PatchUserDTO,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { email, name, id };
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return { id };
+  async deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteById(id);
   }
 }

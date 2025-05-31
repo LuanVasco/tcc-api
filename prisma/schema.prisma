@@ -13,3 +13,24 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  name       String
+  phone      String?  // Ex: (11) 91234-5678
+  document   String?  @unique // CPF (sem pontuação)
+  birthday   DateTime?
+
+  // Endereço detalhado
+  cep        String?  // Ex: 01001-000
+  street     String?  // Rua
+  number     String?  // Número da residência
+  city       String?  // Cidade
+  state      String?  // Estado (SP, RJ, etc.)
+  complement String?  // Bloco, apto, etc.
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

@@ -1,10 +1,10 @@
-// src/modules/institutions/institutions.module.ts
 import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 
 @Module({
-  imports: [],
-  providers: [],
   controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService], // exporta para ser usado no AuthModule por exemplo
 })
 export class UsersModule {}
