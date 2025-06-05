@@ -1,5 +1,6 @@
 // src/modules/institutions/institutions.controller.ts
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { InstitutionsService } from './institutions.service';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { GetInstitutionsQueryDto } from './dto/get-institutions-query.dto';
@@ -9,7 +10,8 @@ import {
 } from './interfaces/institution.interface';
 
 @ApiTags('Instituições')
-@ApiBearerAuth()
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard) // protege a rota
 @Controller('institutions')
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
