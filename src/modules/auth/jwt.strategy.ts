@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -12,7 +13,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub: string, username: string }) {
-    return { userId: payload.sub, username: payload.username };
+  async validate(payload: { sub: string; email: string }) {
+    const user = await this.authService.getById(payload.sub);
+    if (!user) throw new UnauthorizedException();
+    // Retorna apenas os campos que queremos disponibilizar em req.user
+    return {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      document: user.document,
+    };
   }
 }

@@ -21,8 +21,6 @@ export class InstitutionsController {
   async getAllInstitutions(
     @Query() query: GetInstitutionsQueryDto,
   ): Promise<InstitutionsResponse> {
-    // Logando todos os parâmetros de consulta de forma mais detalhada
-    console.log('Query Parameters:', query);
     return await this.institutionsService.listInstitutions(query);
   }
 

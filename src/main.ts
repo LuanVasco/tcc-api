@@ -5,6 +5,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Habilita CORS para sua URL de frontend
+  app.enableCors({
+    origin: 'http://localhost:5173', // endereço onde o Vite serve seu app
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true, // se for usar cookies/credentials
+  });
 
   const config = new DocumentBuilder()
     .setTitle('API de Gestão Financeira')

@@ -1,5 +1,5 @@
 // src/infra/http/belvo/belvo.http-client.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -21,7 +21,7 @@ export class BelvoHttpClient {
 
   async request<T = any>(
     endpoint: string,
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
     body?: any,
     params?: Record<string, string>,
   ): Promise<T> {

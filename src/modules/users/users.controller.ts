@@ -11,6 +11,8 @@ import {
 import { UsersService } from './users.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @ApiTags('Usuários')
 @ApiBearerAuth()
@@ -39,7 +41,8 @@ export class UsersController {
 
   @Get()
   async findAll() {
-    return this.usersService.getAll();
+    const users = await this.usersService.getAll();
+    return plainToInstance(UserResponseDto, users);
   }
 
   @Get(':id')
@@ -48,7 +51,7 @@ export class UsersController {
     if (!user) {
       throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
     }
-    return user;
+    return plainToInstance(UserResponseDto, user);
   }
 
   @Delete(':id')
