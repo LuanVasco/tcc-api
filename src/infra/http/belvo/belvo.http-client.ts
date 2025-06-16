@@ -41,13 +41,12 @@ export class BelvoHttpClient {
 
       return response.data;
     } catch (error) {
-      console.error(
-        '[Belvo] Erro na requisição:',
-        error.response?.data || error.message,
-      );
-      throw new Error(
-        error.response?.data?.message || 'Erro na requisição para a API Belvo',
-      );
+      console.log(error.response);
+      // Se houver resposta da Belvo, use status e data dela
+      const status = error.response?.status ?? HttpStatus.INTERNAL_SERVER_ERROR;
+      const data = error.response?.data ?? { message: error.message };
+      // Lance HttpException com payload e status originais
+      throw new HttpException(data, status);
     }
   }
 }

@@ -10,6 +10,7 @@ import {
   Query,
   Body,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LinksService } from './links.service';
@@ -21,6 +22,10 @@ import { UpdateLinkDto } from './dto/update-link.dto';
 import { UpdateLinkCredentialsDto } from './dto/update-link-credentials.dto';
 import { LinksResponse, Link } from './interfaces/link.interface';
 
+interface JwtUser {
+  sub: string;
+}
+
 @ApiTags('Links')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard)
@@ -29,15 +34,21 @@ export class LinksController {
   constructor(private readonly linksService: LinksService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os links' })
-  async listLinks(@Query() query: GetLinksQueryDto): Promise<LinksResponse> {
-    return this.linksService.listLinks(query);
+  @ApiOperation({ summary: 'Listar todos os links da conta logada' })
+  async listLinks(
+    @Query() query: GetLinksQueryDto,
+    @Req() req: Request & { user: JwtUser },
+  ): Promise<LinksResponse> {
+    return this.linksService.listLinks(query, req.user.sub);
   }
 
   @Post()
   @ApiOperation({ summary: 'Registrar um novo link' })
-  async createLink(@Body() dto: CreateLinkDto): Promise<Link> {
-    return this.linksService.createLink(dto);
+  async createLink(
+    @Body() dto: CreateLinkDto,
+    @Req() req: Request & { user: JwtUser },
+  ): Promise<Link> {
+    return this.linksService.createLink(dto, req.user.sub);
   }
 
   @Patch()
@@ -48,8 +59,11 @@ export class LinksController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Detalhes de um link' })
-  async getLinkById(@Param('id') id: string): Promise<Link> {
-    return this.linksService.getLinkById(id);
+  async getLinkById(
+    @Param('id') id: string,
+    @Req() req: Request & { user: JwtUser },
+  ): Promise<Link> {
+    return this.linksService.getLinkById(id, req.user.sub);
   }
 
   @Patch(':id')
@@ -57,8 +71,9 @@ export class LinksController {
   async updateLink(
     @Param('id') id: string,
     @Body() dto: UpdateLinkDto,
+    @Req() req: Request & { user: JwtUser },
   ): Promise<Link> {
-    return this.linksService.updateLink(id, dto);
+    return this.linksService.updateLink(id, dto, req.user.sub);
   }
 
   @Put(':id')
@@ -66,13 +81,17 @@ export class LinksController {
   async updateLinkCredentials(
     @Param('id') id: string,
     @Body() dto: UpdateLinkCredentialsDto,
+    @Req() req: Request & { user: JwtUser },
   ): Promise<Link> {
-    return this.linksService.updateLinkCredentials(id, dto);
+    return this.linksService.updateLinkCredentials(id, dto, req.user.sub);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Deletar um link' })
-  async deleteLink(@Param('id') id: string): Promise<void> {
-    return this.linksService.deleteLink(id);
+  async deleteLink(
+    @Param('id') id: string,
+    @Req() req: Request & { user: JwtUser },
+  ): Promise<void> {
+    return this.linksService.deleteLink(id, req.user.sub);
   }
 }

@@ -18,9 +18,9 @@ export class WidgetService {
       id: process.env.BELVO_SECRET_ID,
       password: process.env.BELVO_SECRET_PASSWORD,
       scopes: process.env.BELVO_WIDGET_SCOPES, // e.g. "read_institutions,write_links"
-      fetch_resources: process.env.BELVO_WIDGET_FETCH_RESOURCES?.split(','), // e.g. ["ACCOUNTS","TRANSACTIONS","OWNERS"]
-      credentials_storage: process.env.BELVO_WIDGET_CREDENTIALS_STORAGE, // e.g. "store"
       stale_in: process.env.BELVO_WIDGET_STALE_IN, // e.g. "300d"
+      fetch_resources: process.env.BELVO_WIDGET_FETCH_RESOURCES?.split(','), // e.g. ["ACCOUNTS","TRANSACTIONS","OWNERS"]
+      // credentials_storage: process.env.BELVO_WIDGET_CREDENTIALS_STORAGE, // e.g. "store"
       widget: {
         purpose: process.env.BELVO_WIDGET_PURPOSE,
         openfinance_feature: 'consent_link_creation',

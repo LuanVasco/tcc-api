@@ -1,9 +1,5 @@
 // src/modules/links/links.service.ts
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { BelvoHttpClient } from 'src/infra/http/belvo/belvo.http-client';
 import { GetLinksQueryDto } from './dto/get-links-query.dto';
 import { CreateLinkDto } from './dto/create-link.dto';
@@ -15,69 +11,87 @@ import { LinksResponse, Link } from './interfaces/link.interface';
 @Injectable()
 export class LinksService {
   private readonly logger = new Logger(LinksService.name);
-
+  private async ensureOwnership(linkId: string, userId: string) {
+    try {
+      // Isso vai retornar 200 se o link existir pertencer ao userId, ou 404 caso contrário
+      console.log(
+        'Verificando propriedade do link:',
+        linkId,
+        'para usuário:',
+        userId,
+      );
+      await this.belvoClient.request(
+        '/links/' + linkId + '/',
+        'GET',
+        undefined,
+        {
+          external_id: userId,
+        },
+      );
+    } catch (e) {
+      console.log(e);
+      throw new ForbiddenException('Falha ao acessar o link');
+    }
+  }
   constructor(private readonly belvoClient: BelvoHttpClient) {}
 
   // GET /api/links/
-  listLinks(query: GetLinksQueryDto): Promise<LinksResponse> {
-    const params = this.cleanParams(query);
-    // :contentReference[oaicite:0]{index=0}
+  listLinks(query: GetLinksQueryDto, userId: string): Promise<LinksResponse> {
+    const params = this.cleanParams({ ...query, external_id: userId });
     return this.belvoClient.request('/links/', 'GET', undefined, params);
   }
 
   // POST /api/links/
-  async createLink(dto: CreateLinkDto): Promise<Link> {
-    // 1. Ajuste de uppercase e inclusão de credentials_storage
+  async createLink(dto: CreateLinkDto, userId: string): Promise<Link> {
     const payload = {
       ...dto,
-      fetch_resources: (dto.fetch_resources ?? []).map(r => r.toUpperCase()),
-      credentials_storage: dto.credentials_storage ?? '27d',
+      external_id: userId,
+      fetch_resources: (dto.fetch_resources ?? []).map((r) => r.toUpperCase()),
+      credentials_storage: dto.credentials_storage ?? 'none',
     };
 
     this.logger.debug(
       'Payload de createLink: ' + JSON.stringify(payload, null, 2),
     );
-    try {
-      return await this.belvoClient.request('/links/', 'POST', payload);
-    } catch (err: any) {
-      // 2. Log detalhado do erro que a Belvo retorna
-      this.logger.error(
-        `Erro ao criar link: ${err.response?.status}\n` +
-          JSON.stringify(err.response?.data, null, 2),
-      );
-      throw new InternalServerErrorException(
-        'Falha ao criar link. Veja os logs para mais detalhes.',
-      );
-    }
+
+    return this.belvoClient.request('/links/', 'POST', payload);
   }
 
   // PATCH /api/links/  (completar sessão MFA)
   completeLink(dto: CompleteLinkDto): Promise<Link> {
-    // :contentReference[oaicite:2]{index=2}
     return this.belvoClient.request('/links/', 'PATCH', dto);
   }
 
   // GET /api/links/{id}/
-  getLinkById(id: string): Promise<Link> {
-    return this.belvoClient.request(`/links/${id}/`, 'GET'); // :contentReference[oaicite:3]{index=3}
+  async getLinkById(id: string, userId: string): Promise<Link> {
+    await this.ensureOwnership(id, userId);
+    return this.belvoClient.request(`/links/${id}/`, 'GET');
   }
 
   // PATCH /api/links/{id}/
-  updateLink(id: string, dto: UpdateLinkDto): Promise<Link> {
-    return this.belvoClient.request(`/links/${id}/`, 'PATCH', dto); // :contentReference[oaicite:4]{index=4}
+  async updateLink(
+    id: string,
+    dto: UpdateLinkDto,
+    userId: string,
+  ): Promise<Link> {
+    await this.ensureOwnership(id, userId);
+    return this.belvoClient.request(`/links/${id}/`, 'PATCH', dto);
   }
 
   // PUT /api/links/{id}/
-  updateLinkCredentials(
+  async updateLinkCredentials(
     id: string,
     dto: UpdateLinkCredentialsDto,
+    userId: string,
   ): Promise<Link> {
-    return this.belvoClient.request(`/links/${id}/`, 'PUT', dto); // :contentReference[oaicite:5]{index=5}
+    await this.ensureOwnership(id, userId);
+    return this.belvoClient.request(`/links/${id}/`, 'PUT', dto);
   }
 
   // DELETE /api/links/{id}/
-  deleteLink(id: string): Promise<void> {
-    return this.belvoClient.request(`/links/${id}/`, 'DELETE'); // :contentReference[oaicite:6]{index=6}
+  async deleteLink(id: string, userId: string): Promise<void> {
+    await this.ensureOwnership(id, userId);
+    return this.belvoClient.request(`/links/${id}/`, 'DELETE');
   }
 
   private cleanParams(dto: Record<string, any>): Record<string, string> {

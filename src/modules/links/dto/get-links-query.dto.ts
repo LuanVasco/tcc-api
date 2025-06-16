@@ -13,14 +13,6 @@ export class GetLinksQueryDto {
   page?: string;
 
   @ApiPropertyOptional({
-    description: 'ID externo (seu identificador de usuário)',
-    example: '1234',
-  })
-  @IsOptional()
-  @IsString()
-  external_id?: string;
-
-  @ApiPropertyOptional({
     description: 'Instituição (código)',
     example: 'banco_sandbox',
   })

@@ -18,14 +18,6 @@ export class CreateLinkDto {
   password: string;
 
   @ApiPropertyOptional({
-    description: 'ID externo para vinculação',
-    example: 'user-1234',
-  })
-  @IsOptional()
-  @IsString()
-  external_id?: string;
-
-  @ApiPropertyOptional({
     description: 'Modo de acesso (single ou recurrent)',
     example: 'single',
     enum: ['single', 'recurrent'],
