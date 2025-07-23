@@ -37,7 +37,9 @@ export class LinksService {
 
   // GET /api/links/
   listLinks(query: GetLinksQueryDto, userId: string): Promise<LinksResponse> {
+    console.log('Listando links para o usuário:', userId);
     const params = this.cleanParams({ ...query, external_id: userId });
+    console.log('Parâmetros de listagem de links:', params);
     return this.belvoClient.request('/links/', 'GET', undefined, params);
   }
 

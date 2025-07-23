@@ -23,11 +23,11 @@ export class AuthService {
         'Credenciais inválidas. Verifique seu e-mail e senha.',
       );
     }
-    console.log(user)
+    console.log(user);
     return user;
   }
 
-  login(user: { email: string, id: string }) {
+  login(user: { email: string; id: string }) {
     const payload = { username: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),

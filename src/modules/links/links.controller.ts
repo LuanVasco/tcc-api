@@ -39,6 +39,7 @@ export class LinksController {
     @Query() query: GetLinksQueryDto,
     @Req() req: Request & { user: JwtUser },
   ): Promise<LinksResponse> {
+    console.log('Listando links para o usuário:', req.user);
     return this.linksService.listLinks(query, req.user.sub);
   }
 

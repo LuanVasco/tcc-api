@@ -10,10 +10,11 @@ export class UserResponseDto {
   phone: string;
   @Expose()
   document: string;
+  @Expose()
+  id: string;
 
   birthday: string;
   password: string;
-  id: string;
   cep: string;
   street: string;
   number: string;
